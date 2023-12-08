@@ -1,21 +1,8 @@
 #!/usr/bin/env bash
 # Displays information about subdomains
-
 if [ $# -eq 1 ]; then
-    queries=("www.$1" "lb-01.$1" "web-01.$1" "web-02.$1")
-
-    for query in "${queries[@]}"; do
-        dig_result=$(dig +short "$query")
-
-        if [ -n "$dig_result" ]; then
-            subdomain=$(echo "$query" | cut -d'.' -f1)
-            server=$(echo "$query" | cut -d'.' -f2-)
-
-            echo "The subdomain $query has IP address: $dig_result"
-        else
-            echo "The subdomain $query does not have a valid IP address."
-        fi
-    done
+	queries="www.$1 lb-01.$1 web-01.$1 web-02.$1"
 else
-    echo "Usage: $0 <domain>"
+	queries="$2.$1"
 fi
+dig $queries | awk '/ANSWER SECTION:/ { getline; split($1, a, "."); print "The subdomain", a[1], "is a", $4, "record and points to", $5}'
